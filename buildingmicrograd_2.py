@@ -309,15 +309,15 @@ ypred
 
 [(yout - ygt)**2 for ygt, yout in zip(ys, ypred)]
 
+loss = sum([(yout - ygt)**2 for ygt, yout in zip(ys, ypred)])
 
+loss
 
+loss.backward()
 
+n.layers[0].neurons[0].w[0].grad
 
-
-
-
-
-
+draw_dot(loss)
 
 
 
