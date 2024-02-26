@@ -125,11 +125,38 @@ def draw_dot(root):
 
 draw_dot(d)
 
+# class Value:
+
+#   def __init__(self, data, _children=(), _op='', label=''):
+#     self.data = data
+#     self.grad = 0.0
+#     self._prev = set(_children)
+#     self._op = _op
+#     self.label = label
+
+#   def __repr__(self):
+#     return f"Value(data={self.data})"
+
+#   def __add__(self, other):
+#     out = Value(self.data + other.data, (self, other), '+')
+#     return out
+
+#   def __mul__(self, other):
+#     out = Value(self.data * other.data, (self, other), '*')
+#     return out
+
+#   def tanh(self):
+#     x = self.data
+#     t = (math.exp(2*x) - 1)/(math.exp(2*x) + 1)
+#     out = Value(t, (self, ), 'tanh')
+#     return out
+
 class Value:
 
   def __init__(self, data, _children=(), _op='', label=''):
     self.data = data
     self.grad = 0.0
+    self._backward = lambda: None
     self._prev = set(_children)
     self._op = _op
     self.label = label
@@ -139,18 +166,34 @@ class Value:
 
   def __add__(self, other):
     out = Value(self.data + other.data, (self, other), '+')
+
+    def _backward():
+      self.grad += 1.0 * out.grad
+      other.grad += 1.0 * out.grad
+    out._backward = _backward
+
     return out
 
   def __mul__(self, other):
     out = Value(self.data * other.data, (self, other), '*')
+
+    def _backward():
+      self.grad += other.data * out.grad
+      other.grad += self.data * out.grad
+    out._backward = _backward
+
     return out
 
   def tanh(self):
     x = self.data
     t = (math.exp(2*x) - 1)/(math.exp(2*x) + 1)
     out = Value(t, (self, ), 'tanh')
-    return out
 
+    def _backward():
+      self.grad += (1 - t**2) * out.grad
+    out._backward = _backward
+
+    return out
 
 a = Value(2.0, label='a')
 b = Value(-3.0, label='b')
@@ -230,33 +273,37 @@ n = x1w1x2w2 + b; n.label = 'n'
 o = n.tanh(); o.label = 'o'
 
 o.grad = 1.0
-1 - o.data**2
-
-n.grad = 0.5
-x1w1x2w2.grad = 0.5
-b.grad = 0.5
-x1w1.grad = 0.5
-x2w2.grad = 0.5
-x2.grad = w2.data * x2w2.grad
-w2.grad = x2.data * x2w2.grad
-x1.grad = w1.data * x1w1.grad
-w1.grad = x1.data * x1w1.grad
+o._backward()
 
 draw_dot(o)
 
+# o.grad = 1.0
+# 1 - o.data**2
 
+# n.grad = 0.5
+# x1w1x2w2.grad = 0.5
+# b.grad = 0.5
+# x1w1.grad = 0.5
+# x2w2.grad = 0.5
+# x2.grad = w2.data * x2w2.grad
+# w2.grad = x2.data * x2w2.grad
+# x1.grad = w1.data * x1w1.grad
+# w1.grad = x1.data * x1w1.grad
 
+n._backward()
 
+draw_dot(o)
 
+b._backward() # Nothing happens since this is a leaf node
 
+x1w1x2w2._backward()
 
+draw_dot(o)
 
+x1w1._backward()
+x2w2._backward()
 
-
-
-
-
-
+draw_dot(o)
 
 
 
