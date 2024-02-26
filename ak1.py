@@ -358,9 +358,28 @@ o.backward()
 
 draw_dot(o)
 
+"""# Bug - if same node is used its value gets overwritten"""
 
+a = Value(3.0, label='a')
+b = a + a   ; b.label = 'b'
+b.backward()
+draw_dot(b)
 
+# Should be 1 for two noces ( += makes the difference )
 
+"""# Basically problem when any variable is used more than once"""
+
+a = Value(-2.0, label='a')
+b = Value(3.0, label='b')
+d = a * b    ; d.label = 'd'
+e = a + b    ; e.label = 'e'
+f = d * e    ; f.label = 'f'
+
+f.backward()
+
+draw_dot(f)
+
+# Wrong gradients if no += in the gradients while adding _backward function
 
 
 
