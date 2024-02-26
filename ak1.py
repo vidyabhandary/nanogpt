@@ -195,6 +195,22 @@ class Value:
 
     return out
 
+  def backward(self):
+
+    topo = []
+    visited = set()
+    def build_topo(v):
+      if v not in visited:
+        visited.add(v)
+        for child in v._prev:
+          build_topo(child)
+        topo.append(v)
+    build_topo(self)
+
+    self.grad = 1.0
+    for node in reversed(topo):
+      node._backward()
+
 a = Value(2.0, label='a')
 b = Value(-3.0, label='b')
 c = Value(10.0, label='c')
@@ -305,19 +321,42 @@ x2w2._backward()
 
 draw_dot(o)
 
+o.grad = 1.0
 
+topo = []
+visited = set()
+def build_topo(v):
+  if v not in visited:
+    visited.add(v)
+    for child in v._prev:
+      build_topo(child)
+    topo.append(v)
+build_topo(o)
+topo
 
+for node in reversed(topo):
+  node._backward()
 
+draw_dot(o)
 
+# inputs x1,x2
+x1 = Value(2.0, label='x1')
+x2 = Value(0.0, label='x2')
+# weights w1,w2
+w1 = Value(-3.0, label='w1')
+w2 = Value(1.0, label='w2')
+# bias of the neuron
+b = Value(6.8813735870195432, label='b')
+# x1*w1 + x2*w2 + b
+x1w1 = x1*w1; x1w1.label = 'x1*w1'
+x2w2 = x2*w2; x2w2.label = 'x2*w2'
+x1w1x2w2 = x1w1 + x2w2; x1w1x2w2.label = 'x1*w1 + x2*w2'
+n = x1w1x2w2 + b; n.label = 'n'
+o = n.tanh(); o.label = 'o'
 
+o.backward()
 
-
-
-
-
-
-
-
+draw_dot(o)
 
 
 
