@@ -16,3 +16,5 @@ Some high level learnings
 9. He prototypes the layers in a jupyter notebook to check if it works and then transfers it to a working model
 10. Dilated causal convoluted layers !!! A mouthful !!!
 
+https://colab.research.google.com/drive/1JMLa53HDuA-i7ZBmqV7ZnA3c_fvtXnx-?usp=sharing
+
